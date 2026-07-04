@@ -12,7 +12,13 @@ const Page = () => {
 
   return (
     <Main className="flex items-center justify-center ">
-      <div>{!file ? <FileImport setFile={setFile} /> : <Player file={file} />}</div>
+      <div>
+        {!file ? (
+          <FileImport setFile={setFile} />
+        ) : (
+          <Player file={file} showOverlayControls={true} />
+        )}
+      </div>
     </Main>
   )
 }

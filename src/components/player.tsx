@@ -32,7 +32,12 @@ function formatDuration(duration: number): string {
   return seconds.toString()
 }
 
-const Player = ({ file }: { file: File }) => {
+interface PlayerProps {
+  file: File
+  showOverlayControls: boolean
+}
+
+const Player = ({ file, showOverlayControls }: PlayerProps) => {
   const videoUrl = URL.createObjectURL(file)
   const [fileData, setFileData] = useState<InputFileData | null>(null)
 
@@ -89,6 +94,7 @@ const Player = ({ file }: { file: File }) => {
       </CardHeader>
       <CardContent>
         <video
+          controls={showOverlayControls}
           poster={posterUrl}
           src={videoUrl}
           className="aspect-video min-w-100 w-100 rounded-md bg-transparent outline"
