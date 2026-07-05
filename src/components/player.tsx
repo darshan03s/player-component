@@ -1,6 +1,6 @@
 'use client'
 
-import { Info, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { Image as ImageIcon, Info, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card'
 import { getFileData, InputFileData } from '@/lib/mediabunny'
@@ -133,6 +133,21 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
     videoRef.current.requestFullscreen()
   }
 
+  function handleCapture() {
+    if (!videoRef.current) return
+    const canvas = document.createElement('canvas')
+    canvas.width = videoRef.current.videoWidth
+    canvas.height = videoRef.current.videoHeight
+    canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0)
+    const image = canvas.toDataURL()
+    const link = document.createElement('a')
+    link.href = image
+    link.download = 'frame_' + file.name.split('.').slice(0, -1).join('.') + '.png'
+    link.target = '_blank'
+    link.click()
+    link.remove()
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -184,6 +199,9 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
             </Button>
             <Button variant="outline" size="icon-xs" onClick={handleMaximize}>
               <Maximize className="size-3" />
+            </Button>
+            <Button variant="outline" size="icon-xs" onClick={handleCapture}>
+              <ImageIcon className="size-3" />
             </Button>
           </div>
         </div>
