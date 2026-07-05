@@ -30,7 +30,7 @@ function formatDuration(duration: number): string {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
   }
 
-  return seconds.toString()
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 interface PlayerProps {
@@ -45,6 +45,8 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
   const [fileData, setFileData] = useState<InputFileData | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
 
   useEffect(() => {
     getFileData(file).then(setFileData)
@@ -53,14 +55,24 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    const handleTimeUpdate = () => {
-      setProgress((video.currentTime / video.duration) * 100)
+    const syncDuration = () => {
+      if (Number.isFinite(video.duration)) {
+        setDuration(video.duration)
+      }
     }
-
+    const handleTimeUpdate = () => {
+      if (Number.isFinite(video.duration)) {
+        setProgress((video.currentTime / video.duration) * 100)
+      }
+      setCurrentTime(video.currentTime)
+    }
+    syncDuration()
+    video.addEventListener('loadedmetadata', syncDuration)
+    video.addEventListener('durationchange', syncDuration)
     video.addEventListener('timeupdate', handleTimeUpdate)
-
     return () => {
+      video.removeEventListener('loadedmetadata', syncDuration)
+      video.removeEventListener('durationchange', syncDuration)
       video.removeEventListener('timeupdate', handleTimeUpdate)
     }
   }, [fileData])
@@ -128,8 +140,18 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
           className="aspect-video min-w-100 w-100 rounded-md bg-transparent outline"
         />
       </CardContent>
-      <CardFooter>
-        <Slider value={[progress]} max={100} onValueChange={sliderOnValueChange} />
+      <CardFooter className="flex flex-col gap-2">
+        <div className="text-xs font-sans flex-1 w-full flex items-center justify-between">
+          <span>
+            {formatDuration(currentTime)} / {formatDuration(duration)}
+          </span>
+        </div>
+        <Slider
+          value={[progress]}
+          max={100}
+          onValueChange={sliderOnValueChange}
+          className="flex-1 w-full"
+        />
       </CardFooter>
     </Card>
   )
