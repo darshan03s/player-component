@@ -108,7 +108,6 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     setProgress(val[0])
     if (!videoRef.current) return
     videoRef.current.currentTime = (val[0] / 100) * videoRef.current.duration
-    videoRef.current?.play()
   }
 
   function playPause() {
@@ -148,8 +147,6 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     link.remove()
   }
 
-  function handleInfo() {}
-
   return (
     <Card className="w-120 max-w-full gap-0 p-0 relative overflow-hidden">
       {posterUrl && (
@@ -161,19 +158,17 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
           className="absolute inset-0 h-full w-full"
         />
       )}
-      <CardContent className="p-0 relative">
-        <div className="aspect-video min-w-120 w-120">
-          <video
-            ref={videoRef}
-            controls={showHTMLControls}
-            poster={posterUrl}
-            src={videoUrl}
-            className="w-full h-full"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
-          />
-        </div>
+      <CardContent className="p-0 relative aspect-video min-w-120 w-120">
+        <video
+          ref={videoRef}
+          controls={showHTMLControls}
+          poster={posterUrl}
+          src={videoUrl}
+          className="w-full h-full"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+        />
       </CardContent>
       <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-background/10 backdrop-blur-md">
         <div className="text-xs font-sans w-full grid grid-cols-3">
@@ -196,7 +191,7 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
               <ImageIcon className="size-3" />
             </Button>
             <InfoModal file={file} fileData={fileData}>
-              <Button variant="outline" size="icon-xs" onClick={handleInfo}>
+              <Button variant="outline" size="icon-xs">
                 <Info className="size-3" />
               </Button>
             </InfoModal>
