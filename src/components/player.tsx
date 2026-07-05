@@ -15,6 +15,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
+import Image from 'next/image'
 
 function formatBytes(bytes: number) {
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -48,9 +49,6 @@ interface PlayerProps {
 }
 
 const Player = ({ file, showHTMLControls }: PlayerProps) => {
-  const videoUrl = useMemo(() => {
-    return URL.createObjectURL(file)
-  }, [file])
   const [fileData, setFileData] = useState<InputFileData | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [progress, setProgress] = useState(0)
@@ -58,6 +56,22 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
+
+  const videoUrl = useMemo(() => {
+    return URL.createObjectURL(file)
+  }, [file])
+
+  const image = fileData?.metadataTags.images?.[0]
+
+  const posterUrl = useMemo(() => {
+    if (!image) return undefined
+
+    return URL.createObjectURL(
+      new Blob([new Uint8Array(image.data)], {
+        type: image.mimeType
+      })
+    )
+  }, [image])
 
   useEffect(() => {
     getFileData(file).then(setFileData)
@@ -89,16 +103,6 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
   }, [fileData])
 
   if (!fileData) return null
-
-  const image = fileData.metadataTags.images?.[0]
-
-  const posterUrl = image
-    ? URL.createObjectURL(
-        new Blob([new Uint8Array(image.data)], {
-          type: image.mimeType
-        })
-      )
-    : undefined
 
   function sliderOnValueChange(val: number[]) {
     setProgress(val[0])
@@ -147,8 +151,17 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
   function handleInfo() {}
 
   return (
-    <Card className="w-120 max-w-full gap-0 p-0">
-      <CardContent className="p-0">
+    <Card className="w-120 max-w-full gap-0 p-0 relative overflow-hidden">
+      {posterUrl && (
+        <Image
+          width={100}
+          height={100}
+          src={posterUrl}
+          alt="Poster"
+          className="absolute inset-0 h-full w-full"
+        />
+      )}
+      <CardContent className="p-0 relative">
         <div className="aspect-video min-w-120 w-120">
           <video
             ref={videoRef}
@@ -162,7 +175,7 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
           />
         </div>
       </CardContent>
-      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none">
+      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-background/10 backdrop-blur-md">
         <div className="text-xs font-sans w-full grid grid-cols-3">
           <span className="flex items-center">
             {formatDuration(currentTime)} / {formatDuration(duration)}
