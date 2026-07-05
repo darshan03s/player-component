@@ -170,28 +170,28 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
           onEnded={() => setIsPlaying(false)}
         />
       </CardContent>
-      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-background/10 backdrop-blur-xl">
+      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-black/50 backdrop-blur-md">
         <div className="text-xs font-sans w-full grid grid-cols-3">
-          <span className="flex items-center">
+          <span className="flex items-center text-white">
             {formatDuration(currentTime)} / {formatDuration(duration)}
           </span>
           <span className="flex items-center justify-center">
-            <Button variant="default" size="icon-xs" onClick={playPause}>
+            <Button size="icon-xs" onClick={playPause} className="text-black bg-white/80">
               {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
             </Button>
           </span>
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="icon-xs" onClick={handleMute}>
+            <Button size="icon-xs" onClick={handleMute} className="text-black bg-white/80">
               {isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
             </Button>
-            <Button variant="outline" size="icon-xs" onClick={handleMaximize}>
+            <Button size="icon-xs" onClick={handleMaximize} className="text-black bg-white/80">
               <Maximize className="size-3" />
             </Button>
-            <Button variant="outline" size="icon-xs" onClick={handleCapture}>
+            <Button size="icon-xs" onClick={handleCapture} className="text-black bg-white/80">
               <ImageIcon className="size-3" />
             </Button>
             <InfoModal file={file} fileData={fileData}>
-              <Button variant="outline" size="icon-xs">
+              <Button size="icon-xs" className="text-black bg-white/80">
                 <Info className="size-3" />
               </Button>
             </InfoModal>
@@ -204,7 +204,7 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
           className="flex-1 w-full"
         />
         <span
-          className="min-w-0 w-full truncate text-xs text-muted-foreground text-center"
+          className="min-w-0 w-full truncate text-xs text-white/80 text-center"
           title={file.name}
         >
           {file.name}
