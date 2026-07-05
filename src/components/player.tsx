@@ -1,12 +1,20 @@
 'use client'
 
 import { Image as ImageIcon, Info, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card'
+import { Card, CardContent, CardFooter } from './ui/card'
 import { getFileData, InputFileData } from '@/lib/mediabunny'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Slider } from './ui/slider'
 import { Button } from './ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 
 function formatBytes(bytes: number) {
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -82,18 +90,6 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
 
   if (!fileData) return null
 
-  const hoverCardContentMap = {
-    'Last modified': new Date(file.lastModified).toLocaleDateString(),
-    Size: formatBytes(file.size),
-    Format: fileData.format.name,
-    'MIME Type': fileData.format.mimeType,
-    Duration: formatDuration(fileData.duration),
-    Artist: fileData.metadataTags.artist,
-    Album: fileData.metadataTags.album,
-    'Total tracks': fileData.metadataTags.tracksTotal,
-    Genre: fileData.metadataTags.genre
-  }
-
   const image = fileData.metadataTags.images?.[0]
 
   const posterUrl = image
@@ -148,42 +144,25 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     link.remove()
   }
 
+  function handleInfo() {}
+
   return (
-    <Card className="gap-0 p-0">
-      <CardHeader className="flex flex-row items-center justify-between bg-muted/50 min-h-10 h-10">
-        <div></div>
-        <CardTitle className="text-center line-clamp-2">{file.name}</CardTitle>
-        <HoverCard>
-          <HoverCardTrigger className="cursor-pointer opacity-50 hover:opacity-80 transition-opacity duration-200">
-            <Info className="size-4" />
-          </HoverCardTrigger>
-          <HoverCardContent side="bottom" className="w-48">
-            <div className="flex flex-col gap-2 text-xs">
-              {Object.entries(hoverCardContentMap).map(([key, value]) =>
-                value ? (
-                  <div key={key}>
-                    <span className="font-semibold">{key} : </span>
-                    <span>{value}</span>
-                  </div>
-                ) : null
-              )}
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-      </CardHeader>
+    <Card className="w-120 max-w-full gap-0 p-0">
       <CardContent className="p-0">
-        <video
-          ref={videoRef}
-          controls={showHTMLControls}
-          poster={posterUrl}
-          src={videoUrl}
-          className="aspect-video min-w-120 w-120"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-        />
+        <div className="aspect-video min-w-120 w-120">
+          <video
+            ref={videoRef}
+            controls={showHTMLControls}
+            poster={posterUrl}
+            src={videoUrl}
+            className="w-full h-full"
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+          />
+        </div>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2 border-none">
+      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none">
         <div className="text-xs font-sans w-full grid grid-cols-3">
           <span className="flex items-center">
             {formatDuration(currentTime)} / {formatDuration(duration)}
@@ -203,6 +182,11 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
             <Button variant="outline" size="icon-xs" onClick={handleCapture}>
               <ImageIcon className="size-3" />
             </Button>
+            <InfoModal file={file} fileData={fileData}>
+              <Button variant="outline" size="icon-xs" onClick={handleInfo}>
+                <Info className="size-3" />
+              </Button>
+            </InfoModal>
           </div>
         </div>
         <Slider
@@ -211,8 +195,62 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
           onValueChange={sliderOnValueChange}
           className="flex-1 w-full"
         />
+        <span
+          className="min-w-0 w-full truncate text-xs text-muted-foreground text-center"
+          title={file.name}
+        >
+          {file.name}
+        </span>
       </CardFooter>
     </Card>
+  )
+}
+
+function InfoModal({
+  children,
+  file,
+  fileData
+}: {
+  children: React.ReactNode
+  file: File
+  fileData: InputFileData
+}) {
+  const hoverCardContentMap = {
+    'Last modified': new Date(file.lastModified).toLocaleDateString(),
+    Size: formatBytes(file.size),
+    Format: fileData.format.name,
+    'MIME Type': fileData.format.mimeType,
+    Duration: formatDuration(fileData.duration),
+    Artist: fileData.metadataTags.artist,
+    Album: fileData.metadataTags.album,
+    'Total tracks': fileData.metadataTags.tracksTotal,
+    Genre: fileData.metadataTags.genre
+  }
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Info</DialogTitle>
+          <DialogDescription>Metadata about the file</DialogDescription>
+        </DialogHeader>
+        <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+          <span>
+            {Object.entries(hoverCardContentMap).map(
+              ([key, value]) =>
+                value && (
+                  <Item variant="default" size="xs" key={key}>
+                    <ItemContent>
+                      <ItemTitle className="font-semibold text-sm">{key}</ItemTitle>
+                      <ItemDescription className="text-xs">{value}</ItemDescription>
+                    </ItemContent>
+                  </Item>
+                )
+            )}
+          </span>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
