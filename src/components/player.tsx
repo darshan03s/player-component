@@ -1,10 +1,11 @@
 'use client'
 
 import { Info } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card'
 import { getFileData, InputFileData } from '@/lib/mediabunny'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Slider } from './ui/slider'
 
 function formatBytes(bytes: number) {
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -38,12 +39,31 @@ interface PlayerProps {
 }
 
 const Player = ({ file, showOverlayControls }: PlayerProps) => {
-  const videoUrl = URL.createObjectURL(file)
+  const videoUrl = useMemo(() => {
+    return URL.createObjectURL(file)
+  }, [file])
   const [fileData, setFileData] = useState<InputFileData | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     getFileData(file).then(setFileData)
   }, [file])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleTimeUpdate = () => {
+      setProgress((video.currentTime / video.duration) * 100)
+    }
+
+    video.addEventListener('timeupdate', handleTimeUpdate)
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+    }
+  }, [fileData])
 
   if (!fileData) return null
 
@@ -68,6 +88,13 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
         })
       )
     : undefined
+
+  function sliderOnValueChange(val: number[]) {
+    setProgress(val[0])
+    if (!videoRef.current) return
+    videoRef.current.currentTime = (val[0] / 100) * videoRef.current.duration
+    videoRef.current?.play()
+  }
 
   return (
     <Card>
@@ -94,12 +121,16 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
       </CardHeader>
       <CardContent>
         <video
+          ref={videoRef}
           controls={showOverlayControls}
           poster={posterUrl}
           src={videoUrl}
           className="aspect-video min-w-100 w-100 rounded-md bg-transparent outline"
         />
       </CardContent>
+      <CardFooter>
+        <Slider value={[progress]} max={100} onValueChange={sliderOnValueChange} />
+      </CardFooter>
     </Card>
   )
 }
