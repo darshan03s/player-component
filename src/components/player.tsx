@@ -36,10 +36,10 @@ function formatDuration(duration: number): string {
 
 interface PlayerProps {
   file: File
-  showOverlayControls: boolean
+  showHTMLControls?: boolean
 }
 
-const Player = ({ file, showOverlayControls }: PlayerProps) => {
+const Player = ({ file, showHTMLControls }: PlayerProps) => {
   const videoUrl = useMemo(() => {
     return URL.createObjectURL(file)
   }, [file])
@@ -149,8 +149,8 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="gap-0 p-0">
+      <CardHeader className="flex flex-row items-center justify-between bg-muted/50 h-10">
         <div></div>
         <CardTitle className="text-center line-clamp-2">{file.name}</CardTitle>
         <HoverCard>
@@ -171,19 +171,19 @@ const Player = ({ file, showOverlayControls }: PlayerProps) => {
           </HoverCardContent>
         </HoverCard>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <video
           ref={videoRef}
-          controls={showOverlayControls}
+          controls={showHTMLControls}
           poster={posterUrl}
           src={videoUrl}
-          className="aspect-video min-w-100 w-100 rounded-md bg-transparent outline"
+          className="aspect-video min-w-120 w-120"
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
         />
       </CardContent>
-      <CardFooter className="flex flex-col gap-2">
+      <CardFooter className="flex flex-col gap-2 border-none">
         <div className="text-xs font-sans w-full grid grid-cols-3">
           <span className="flex items-center">
             {formatDuration(currentTime)} / {formatDuration(duration)}
