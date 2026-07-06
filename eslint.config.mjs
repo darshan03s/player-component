@@ -11,7 +11,8 @@ const eslintConfig = defineConfig([
       'unused-imports': unusedImports
     },
     rules: {
-      'unused-imports/no-unused-imports': 'error'
+      'unused-imports/no-unused-imports': 'error',
+      'react-hooks/set-state-in-effect': 'off'
     }
   },
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts'])

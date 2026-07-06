@@ -3,7 +3,7 @@
 import { Image as ImageIcon, Info, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { Card, CardContent, CardFooter } from './ui/card'
 import { getFileData, InputFileData } from '@/lib/mediabunny'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Slider } from './ui/slider'
 import { Button } from './ui/button'
 import {
@@ -56,21 +56,33 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
+  const [videoUrl, setVideoUrl] = useState<string>()
+  const [posterUrl, setPosterUrl] = useState<string>()
 
-  const videoUrl = useMemo(() => {
-    return URL.createObjectURL(file)
+  useEffect(() => {
+    const url = URL.createObjectURL(file)
+    setVideoUrl(url)
+
+    return () => URL.revokeObjectURL(url)
   }, [file])
 
   const image = fileData?.metadataTags.images?.[0]
 
-  const posterUrl = useMemo(() => {
-    if (!image) return undefined
+  useEffect(() => {
+    if (!image) {
+      setPosterUrl(undefined)
+      return
+    }
 
-    return URL.createObjectURL(
+    const url = URL.createObjectURL(
       new Blob([new Uint8Array(image.data)], {
         type: image.mimeType
       })
     )
+
+    setPosterUrl(url)
+
+    return () => URL.revokeObjectURL(url)
   }, [image])
 
   useEffect(() => {
