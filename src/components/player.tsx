@@ -320,8 +320,12 @@ const Video = memo(function Video() {
 })
 
 const PlayerFooter = memo(function PlayerFooter() {
+  const { posterUrl } = usePlayerStaticContext()
+
   return (
-    <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-black/50 backdrop-blur-md">
+    <CardFooter
+      className={`flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative ${posterUrl ? 'bg-black/50 backdrop-blur-md' : 'bg-black/90 dark:bg-black/50'}`}
+    >
       <Controls />
       <ProgressBar />
       <FileName />
