@@ -368,7 +368,7 @@ const ProgressBar = () => {
       value={[progress]}
       max={100}
       onValueChange={sliderOnValueChange}
-      className="flex-1 w-full"
+      className="flex-1 w-full **:data-[slot='slider-track']:bg-white/50 **:data-[slot='slider-range']:bg-white/50 **:data-[slot='slider-track']:cursor-pointer"
     />
   )
 }
