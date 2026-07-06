@@ -348,7 +348,7 @@ const Video = memo(function Video() {
     <CardContent className="p-0 relative aspect-video min-w-120 w-120">
       {type === 'audio' && !posterUrl && (
         <div className="absolute inset-0 flex items-center justify-center bg-linear-to-b from-primary/10 to-transparent">
-          <Music className="size-14" />
+          <Music className="size-14 text-primary" />
         </div>
       )}
       <video
@@ -373,13 +373,13 @@ const PlayerFooter = memo(function PlayerFooter() {
     <CardFooter
       className={cn(
         'flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative',
-        posterUrl ? 'bg-black/50 backdrop-blur-md' : 'bg-black/90 dark:bg-black/50',
-        '**:data-time:text-white',
-        '**:data-playpause:text-black **:data-playpause:bg-white/80',
-        '**:data-controls-right:text-black **:data-controls-right:bg-white/80',
-        '**:data-filename:text-white/80',
-        "**:data-[slot='slider-track']:bg-white/50 **:data-[slot='slider-track']:cursor-pointer",
-        "**:data-[slot='slider-range']:bg-white/50"
+        posterUrl ? 'bg-black/30 backdrop-blur-md' : 'bg-background',
+        !posterUrl ? '**:data-time:text-foreground' : '**:data-time:text-white',
+        '**:data-playpause:text-primary-foreground **:data-playpause:bg-primary/80',
+        '**:data-controls-right:text-primary-foreground **:data-controls-right:bg-primary/80',
+        !posterUrl ? '**:data-filename:text-foreground' : '**:data-filename:text-white',
+        "**:data-[slot='slider-track']:bg-primary/30 **:data-[slot='slider-track']:cursor-pointer",
+        "**:data-[slot='slider-range']:bg-primary/80"
       )}
     >
       <Controls />
