@@ -3,7 +3,16 @@
 import { Image as ImageIcon, Info, Maximize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { Card, CardContent, CardFooter } from './ui/card'
 import { getFileData, InputFileData } from '@/lib/mediabunny'
-import { useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { Slider } from './ui/slider'
 import { Button } from './ui/button'
 import {
@@ -15,7 +24,6 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
-import Image from 'next/image'
 
 function formatBytes(bytes: number) {
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -43,19 +51,57 @@ function formatDuration(duration: number): string {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
-interface PlayerProps {
+type PlayerProps = {
   file: File
   showHTMLControls?: boolean
 }
 
-const Player = ({ file, showHTMLControls }: PlayerProps) => {
+type PlaybackState = {
+  progress: number
+  duration: number
+  currentTime: number
+  isPlaying: boolean
+  isMuted: boolean
+}
+
+type PlayerStaticContextType = {
+  file: File
+  fileData: InputFileData
+  videoRef: React.RefObject<HTMLVideoElement | null>
+  posterUrl: string | undefined
+  videoUrl: string | undefined
+  showHTMLControls: boolean | undefined
+  setIsPlaying: (isPlaying: boolean) => void
+  setIsMuted: (isMuted: boolean) => void
+  sliderOnValueChange: (value: number[]) => void
+  playPause: () => void
+  handleMute: () => void
+  handleMaximize: () => void
+  handleCapture: () => void
+}
+
+const PlayerStaticContext = createContext<PlayerStaticContextType | undefined>(undefined)
+
+const PlayerPlaybackContext = createContext<PlaybackState | undefined>(undefined)
+
+const PlayerProvider = ({
+  children,
+  file,
+  showHTMLControls
+}: {
+  children: React.ReactNode
+  file: File
+  showHTMLControls: boolean | undefined
+}) => {
   const [fileData, setFileData] = useState<InputFileData | null>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [progress, setProgress] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const [playback, setPlayback] = useState<PlaybackState>({
+    progress: 0,
+    duration: 0,
+    currentTime: 0,
+    isPlaying: false,
+    isMuted: false
+  })
   const [videoUrl, setVideoUrl] = useState<string>()
   const [posterUrl, setPosterUrl] = useState<string>()
 
@@ -94,14 +140,17 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     if (!video) return
     const syncDuration = () => {
       if (Number.isFinite(video.duration)) {
-        setDuration(video.duration)
+        setPlayback((prev) => ({ ...prev, duration: video.duration }))
       }
     }
     const handleTimeUpdate = () => {
-      if (Number.isFinite(video.duration)) {
-        setProgress((video.currentTime / video.duration) * 100)
-      }
-      setCurrentTime(video.currentTime)
+      setPlayback((prev) => ({
+        ...prev,
+        currentTime: video.currentTime,
+        progress: Number.isFinite(video.duration)
+          ? (video.currentTime / video.duration) * 100
+          : prev.progress
+      }))
     }
     syncDuration()
     video.addEventListener('loadedmetadata', syncDuration)
@@ -114,42 +163,49 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     }
   }, [fileData])
 
-  if (!fileData) return null
+  const setIsPlaying = useCallback((isPlaying: boolean) => {
+    setPlayback((prev) => ({ ...prev, isPlaying }))
+  }, [])
 
-  function sliderOnValueChange(val: number[]) {
-    setProgress(val[0])
-    if (!videoRef.current) return
-    videoRef.current.currentTime = (val[0] / 100) * videoRef.current.duration
-  }
+  const setIsMuted = useCallback((isMuted: boolean) => {
+    setPlayback((prev) => ({ ...prev, isMuted }))
+  }, [])
 
-  function playPause() {
-    if (!videoRef.current) return
-    if (isPlaying) {
-      videoRef.current.pause()
-      setIsPlaying(false)
+  const sliderOnValueChange = useCallback((val: number[]) => {
+    setPlayback((prev) => ({ ...prev, progress: val[0] }))
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime = (val[0] / 100) * video.duration
+  }, [])
+
+  const playPause = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) {
+      void video.play()
     } else {
-      videoRef.current.play()
-      setIsPlaying(true)
+      video.pause()
     }
-  }
+  }, [])
 
-  function handleMute() {
-    if (!videoRef.current) return
-    videoRef.current.muted = !videoRef.current.muted
-    setIsMuted(videoRef.current.muted)
-  }
+  const handleMute = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.muted = !video.muted
+    setPlayback((prev) => ({ ...prev, isMuted: video.muted }))
+  }, [])
 
-  function handleMaximize() {
-    if (!videoRef.current) return
-    videoRef.current.requestFullscreen()
-  }
+  const handleMaximize = useCallback(() => {
+    videoRef.current?.requestFullscreen()
+  }, [])
 
-  function handleCapture() {
-    if (!videoRef.current) return
+  const handleCapture = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
     const canvas = document.createElement('canvas')
-    canvas.width = videoRef.current.videoWidth
-    canvas.height = videoRef.current.videoHeight
-    canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0)
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    canvas.getContext('2d')?.drawImage(video, 0, 0)
     const image = canvas.toDataURL()
     const link = document.createElement('a')
     link.href = image
@@ -157,84 +213,179 @@ const Player = ({ file, showHTMLControls }: PlayerProps) => {
     link.target = '_blank'
     link.click()
     link.remove()
-  }
+  }, [file.name])
+
+  const staticValue = useMemo<PlayerStaticContextType | null>(() => {
+    if (!fileData) return null
+    return {
+      file,
+      fileData,
+      videoRef,
+      showHTMLControls,
+      posterUrl,
+      videoUrl,
+      setIsPlaying,
+      setIsMuted,
+      sliderOnValueChange,
+      playPause,
+      handleMute,
+      handleMaximize,
+      handleCapture
+    }
+  }, [
+    file,
+    fileData,
+    showHTMLControls,
+    posterUrl,
+    videoUrl,
+    setIsPlaying,
+    setIsMuted,
+    sliderOnValueChange,
+    playPause,
+    handleMute,
+    handleMaximize,
+    handleCapture
+  ])
+
+  if (!staticValue) return null
 
   return (
+    <PlayerStaticContext.Provider value={staticValue}>
+      <PlayerPlaybackContext.Provider value={playback}>{children}</PlayerPlaybackContext.Provider>
+    </PlayerStaticContext.Provider>
+  )
+}
+
+const Player = ({ file, showHTMLControls }: PlayerProps) => {
+  return (
     <Card className="w-120 max-w-full gap-0 p-0 relative overflow-hidden">
-      {posterUrl && (
-        <Image
-          width={100}
-          height={100}
-          src={posterUrl}
-          alt="Poster"
-          className="absolute inset-0 h-full w-full"
-        />
-      )}
-      <CardContent className="p-0 relative aspect-video min-w-120 w-120">
-        <video
-          ref={videoRef}
-          controls={showHTMLControls}
-          poster={posterUrl}
-          src={videoUrl}
-          className="w-full h-full"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-        />
-      </CardContent>
-      <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-black/50 backdrop-blur-md">
-        <div className="text-xs font-sans w-full grid grid-cols-3">
-          <span className="flex items-center text-white">
-            {formatDuration(currentTime)} / {formatDuration(duration)}
-          </span>
-          <span className="flex items-center justify-center">
-            <Button size="icon-xs" onClick={playPause} className="text-black bg-white/80">
-              {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
-            </Button>
-          </span>
-          <div className="flex items-center justify-end gap-2">
-            <Button size="icon-xs" onClick={handleMute} className="text-black bg-white/80">
-              {isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
-            </Button>
-            <Button size="icon-xs" onClick={handleMaximize} className="text-black bg-white/80">
-              <Maximize className="size-3" />
-            </Button>
-            <Button size="icon-xs" onClick={handleCapture} className="text-black bg-white/80">
-              <ImageIcon className="size-3" />
-            </Button>
-            <InfoModal file={file} fileData={fileData}>
-              <Button size="icon-xs" className="text-black bg-white/80">
-                <Info className="size-3" />
-              </Button>
-            </InfoModal>
-          </div>
-        </div>
-        <Slider
-          value={[progress]}
-          max={100}
-          onValueChange={sliderOnValueChange}
-          className="flex-1 w-full"
-        />
-        <span
-          className="min-w-0 w-full truncate text-xs text-white/80 text-center"
-          title={file.name}
-        >
-          {file.name}
-        </span>
-      </CardFooter>
+      <PlayerProvider file={file} showHTMLControls={showHTMLControls}>
+        <Poster />
+        <Video />
+        <PlayerFooter />
+      </PlayerProvider>
     </Card>
   )
 }
 
-function InfoModal({
-  children,
-  file,
-  fileData
-}: {
-  children: React.ReactNode
-  file: File
-  fileData: InputFileData
-}) {
+const usePlayerStaticContext = () => {
+  const context = useContext(PlayerStaticContext)
+  if (!context) {
+    throw new Error('usePlayerStaticContext must be used within a PlayerProvider')
+  }
+  return context
+}
+
+const usePlayerPlaybackContext = () => {
+  const context = useContext(PlayerPlaybackContext)
+  if (!context) {
+    throw new Error('usePlayerPlaybackContext must be used within a PlayerProvider')
+  }
+  return context
+}
+
+const Poster = memo(function Poster() {
+  const { posterUrl } = usePlayerStaticContext()
+
+  if (!posterUrl) return null
+
+  return (
+    <img
+      width={100}
+      height={100}
+      src={posterUrl}
+      alt="Poster"
+      className="absolute inset-0 h-full w-full"
+    />
+  )
+})
+
+const Video = memo(function Video() {
+  const { videoRef, showHTMLControls, posterUrl, videoUrl, setIsPlaying } = usePlayerStaticContext()
+
+  return (
+    <CardContent className="p-0 relative aspect-video min-w-120 w-120">
+      <video
+        ref={videoRef}
+        controls={showHTMLControls}
+        poster={posterUrl}
+        src={videoUrl}
+        className="w-full h-full"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+      />
+    </CardContent>
+  )
+})
+
+const PlayerFooter = memo(function PlayerFooter() {
+  return (
+    <CardFooter className="flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative bg-black/50 backdrop-blur-md">
+      <Controls />
+      <ProgressBar />
+      <FileName />
+    </CardFooter>
+  )
+})
+
+const Controls = () => {
+  const { playPause, handleMute, handleMaximize, handleCapture } = usePlayerStaticContext()
+  const { currentTime, duration, isPlaying, isMuted } = usePlayerPlaybackContext()
+
+  return (
+    <div className="text-xs font-sans w-full grid grid-cols-3">
+      <span className="flex items-center text-white">
+        {formatDuration(currentTime)} / {formatDuration(duration)}
+      </span>
+      <span className="flex items-center justify-center">
+        <Button size="icon-xs" onClick={playPause} className="text-black bg-white/80">
+          {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
+        </Button>
+      </span>
+      <div className="flex items-center justify-end gap-2">
+        <Button size="icon-xs" onClick={handleMute} className="text-black bg-white/80">
+          {isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
+        </Button>
+        <Button size="icon-xs" onClick={handleMaximize} className="text-black bg-white/80">
+          <Maximize className="size-3" />
+        </Button>
+        <Button size="icon-xs" onClick={handleCapture} className="text-black bg-white/80">
+          <ImageIcon className="size-3" />
+        </Button>
+        <InfoModal />
+      </div>
+    </div>
+  )
+}
+
+const ProgressBar = () => {
+  const { sliderOnValueChange } = usePlayerStaticContext()
+  const { progress } = usePlayerPlaybackContext()
+
+  return (
+    <Slider
+      value={[progress]}
+      max={100}
+      onValueChange={sliderOnValueChange}
+      className="flex-1 w-full"
+    />
+  )
+}
+
+const FileName = memo(function FileName() {
+  const { file } = usePlayerStaticContext()
+
+  return (
+    <span className="min-w-0 w-full truncate text-xs text-white/80 text-center" title={file.name}>
+      {file.name}
+    </span>
+  )
+})
+
+const InfoModal = memo(function InfoModal() {
+  const { file, fileData } = usePlayerStaticContext()
+
   const hoverCardContentMap = {
     'Last modified': new Date(file.lastModified).toLocaleDateString(),
     Size: formatBytes(file.size),
@@ -246,9 +397,14 @@ function InfoModal({
     'Total tracks': fileData.metadataTags.tracksTotal,
     Genre: fileData.metadataTags.genre
   }
+
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="icon-xs" className="text-black bg-white/80">
+          <Info className="size-3" />
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Info</DialogTitle>
@@ -272,6 +428,6 @@ function InfoModal({
       </DialogContent>
     </Dialog>
   )
-}
+})
 
 export default Player
