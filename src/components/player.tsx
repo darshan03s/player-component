@@ -24,6 +24,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
+import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -291,6 +292,7 @@ const Poster = memo(function Poster() {
 
   return (
     <img
+      data-posterimage
       width={100}
       height={100}
       src={posterUrl}
@@ -306,6 +308,7 @@ const Video = memo(function Video() {
   return (
     <CardContent className="p-0 relative aspect-video min-w-120 w-120">
       <video
+        data-video
         ref={videoRef}
         controls={showHTMLControls}
         poster={posterUrl}
@@ -324,7 +327,16 @@ const PlayerFooter = memo(function PlayerFooter() {
 
   return (
     <CardFooter
-      className={`flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative ${posterUrl ? 'bg-black/50 backdrop-blur-md' : 'bg-black/90 dark:bg-black/50'}`}
+      className={cn(
+        'flex min-w-0 w-full flex-col gap-2 overflow-hidden border-none relative',
+        posterUrl ? 'bg-black/50 backdrop-blur-md' : 'bg-black/90 dark:bg-black/50',
+        '**:data-time:text-white',
+        '**:data-playpause:text-black **:data-playpause:bg-white/80',
+        '**:data-controls-right:text-black **:data-controls-right:bg-white/80',
+        '**:data-filename:text-white/80',
+        "**:data-[slot='slider-track']:bg-white/50 **:data-[slot='slider-track']:cursor-pointer",
+        "**:data-[slot='slider-range']:bg-white/50"
+      )}
     >
       <Controls />
       <ProgressBar />
@@ -339,22 +351,22 @@ const Controls = () => {
 
   return (
     <div className="text-xs font-sans w-full grid grid-cols-3">
-      <span className="flex items-center text-white">
+      <span data-time className="flex items-center">
         {formatDuration(currentTime)} / {formatDuration(duration)}
       </span>
       <span className="flex items-center justify-center">
-        <Button size="icon-xs" onClick={playPause} className="text-black bg-white/80">
+        <Button data-playpause size="icon-xs" onClick={playPause}>
           {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
         </Button>
       </span>
       <div className="flex items-center justify-end gap-2">
-        <Button size="icon-xs" onClick={handleMute} className="text-black bg-white/80">
+        <Button data-controls-right size="icon-xs" onClick={handleMute}>
           {isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
         </Button>
-        <Button size="icon-xs" onClick={handleMaximize} className="text-black bg-white/80">
+        <Button data-controls-right size="icon-xs" onClick={handleMaximize}>
           <Maximize className="size-3" />
         </Button>
-        <Button size="icon-xs" onClick={handleCapture} className="text-black bg-white/80">
+        <Button data-controls-right size="icon-xs" onClick={handleCapture}>
           <ImageIcon className="size-3" />
         </Button>
         <InfoModal />
@@ -372,7 +384,7 @@ const ProgressBar = () => {
       value={[progress]}
       max={100}
       onValueChange={sliderOnValueChange}
-      className="flex-1 w-full **:data-[slot='slider-track']:bg-white/50 **:data-[slot='slider-range']:bg-white/50 **:data-[slot='slider-track']:cursor-pointer"
+      className="flex-1 w-full"
     />
   )
 }
@@ -381,7 +393,7 @@ const FileName = memo(function FileName() {
   const { file } = usePlayerStaticContext()
 
   return (
-    <span className="min-w-0 w-full truncate text-xs text-white/80 text-center" title={file.name}>
+    <span data-filename className="min-w-0 w-full truncate text-xs text-center" title={file.name}>
       {file.name}
     </span>
   )
@@ -405,7 +417,7 @@ const InfoModal = memo(function InfoModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="icon-xs" className="text-black bg-white/80">
+        <Button data-controls-right size="icon-xs">
           <Info className="size-3" />
         </Button>
       </DialogTrigger>
