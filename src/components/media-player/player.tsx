@@ -198,6 +198,51 @@ const FileName = memo(function FileName() {
   )
 })
 
+function TrackInfoField({ title, value }: { title: string; value: React.ReactNode }) {
+  return (
+    <Item>
+      <ItemContent>
+        <ItemTitle>{title}</ItemTitle>
+        <ItemDescription>{value}</ItemDescription>
+      </ItemContent>
+    </Item>
+  )
+}
+
+function getTrackInfoFields(track: TrackData) {
+  const fields: { title: string; value: React.ReactNode }[] = [
+    {
+      title: 'Average bitrate',
+      value: track.averageBitrate ? formatBitrate(track.averageBitrate) : 'N/A'
+    },
+    { title: 'Codec', value: track.codec ?? 'N/A' },
+    { title: 'Codec string', value: track.codecParamString ?? 'N/A' },
+    { title: 'Language', value: track.lang ?? 'N/A' }
+  ]
+
+  if (track.isVideo) {
+    fields.push(
+      {
+        title: 'Frame rate',
+        value: track.frameRate ? truncateTo2Decimals(track.frameRate) : 'N/A'
+      },
+      { title: 'Coded height', value: track.codedHeight ?? 'N/A' },
+      { title: 'Coded width', value: track.codedWidth ?? 'N/A' },
+      { title: 'Display height', value: track.displayHeight ?? 'N/A' },
+      { title: 'Display width', value: track.displayWidth ?? 'N/A' }
+    )
+  }
+
+  if (track.isAudio) {
+    fields.push(
+      { title: 'Sample rate', value: track.sampleRate ?? 'N/A' },
+      { title: 'Channels', value: track.channels ?? 'N/A' }
+    )
+  }
+
+  return fields
+}
+
 const InfoModal = memo(function InfoModal({ children }: { children: React.ReactNode }) {
   const { file, fileData } = usePlayerStaticContext()
   const [tracksData, setTracksData] = useState<TrackData[]>([])
@@ -243,101 +288,28 @@ const InfoModal = memo(function InfoModal({ children }: { children: React.ReactN
           <Item size="xs" className="p-0">
             <ItemContent>
               <div className="space-y-4">
-                {tracksData.map((track) => {
-                  return (
-                    <Item
-                      key={track.id}
-                      variant={'default'}
-                      className='**:data-[slot="item-title"]:text-xs **:data-[slot="item-description"]:text-xs bg-muted'
-                    >
-                      <ItemContent>
-                        <ItemTitle className="capitalize bg-primary text-primary-foreground p-1 px-2 rounded-full text-[10px]!">
-                          {track.type}
-                        </ItemTitle>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Item>
-                            <ItemContent>
-                              <ItemTitle>Average bitrate</ItemTitle>
-                              <ItemDescription>
-                                {track.averageBitrate ? formatBitrate(track.averageBitrate) : 'N/A'}
-                              </ItemDescription>
-                            </ItemContent>
-                          </Item>
-                          <Item>
-                            <ItemContent>
-                              <ItemTitle>Codec</ItemTitle>
-                              <ItemDescription>{track.codec ?? 'N/A'}</ItemDescription>
-                            </ItemContent>
-                          </Item>
-                          <Item>
-                            <ItemContent>
-                              <ItemTitle>Codec string</ItemTitle>
-                              <ItemDescription>{track.codecParamString ?? 'N/A'}</ItemDescription>
-                            </ItemContent>
-                          </Item>
-                          <Item>
-                            <ItemContent>
-                              <ItemTitle>Language</ItemTitle>
-                              <ItemDescription>{track.lang ?? 'N/A'}</ItemDescription>
-                            </ItemContent>
-                          </Item>
-                          {track.isVideo && (
-                            <>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Frame rate</ItemTitle>
-                                  <ItemDescription>
-                                    {track.frameRate ? truncateTo2Decimals(track.frameRate) : 'N/A'}
-                                  </ItemDescription>
-                                </ItemContent>
-                              </Item>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Coded height</ItemTitle>
-                                  <ItemDescription>{track.codedHeight ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Coded width</ItemTitle>
-                                  <ItemDescription>{track.codedWidth ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Display height</ItemTitle>
-                                  <ItemDescription>{track.displayHeight ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Display width</ItemTitle>
-                                  <ItemDescription>{track.displayWidth ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                            </>
-                          )}
-                          {track.isAudio && (
-                            <>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Sample rate</ItemTitle>
-                                  <ItemDescription>{track.sampleRate ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                              <Item>
-                                <ItemContent>
-                                  <ItemTitle>Channels</ItemTitle>
-                                  <ItemDescription>{track.channels ?? 'N/A'}</ItemDescription>
-                                </ItemContent>
-                              </Item>
-                            </>
-                          )}
-                        </div>
-                      </ItemContent>
-                    </Item>
-                  )
-                })}
+                {tracksData.map((track) => (
+                  <Item
+                    key={track.id}
+                    variant="default"
+                    className='**:data-[slot="item-title"]:text-xs **:data-[slot="item-description"]:text-xs bg-muted'
+                  >
+                    <ItemContent>
+                      <ItemTitle className="capitalize bg-primary text-primary-foreground p-1 px-2 rounded-full text-[10px]!">
+                        {track.type}
+                      </ItemTitle>
+                      <div className="grid grid-cols-2 gap-2">
+                        {getTrackInfoFields(track).map((field) => (
+                          <TrackInfoField
+                            key={field.title}
+                            title={field.title}
+                            value={field.value}
+                          />
+                        ))}
+                      </div>
+                    </ItemContent>
+                  </Item>
+                ))}
               </div>
             </ItemContent>
           </Item>
