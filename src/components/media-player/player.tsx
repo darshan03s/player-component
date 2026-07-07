@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dialog'
 import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 import { cn } from '@/lib/utils'
-import { formatBytes, formatDuration } from './utils'
+import { formatBitrate, formatBytes, formatDuration, truncateTo2Decimals } from './utils'
 import { PlayerProvider, usePlayerStaticContext, usePlayerPlaybackContext } from './provider'
 
 type PlayerProps = {
@@ -192,19 +192,118 @@ const InfoModal = memo(function InfoModal() {
           <DialogDescription>Metadata about the file</DialogDescription>
         </DialogHeader>
         <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
-          <span>
-            {Object.entries(hoverCardContentMap).map(
-              ([key, value]) =>
-                value && (
-                  <Item variant="default" size="xs" key={key}>
-                    <ItemContent>
-                      <ItemTitle className="font-semibold text-sm">{key}</ItemTitle>
-                      <ItemDescription className="text-xs">{value}</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                )
-            )}
-          </span>
+          {Object.entries(hoverCardContentMap).map(
+            ([key, value]) =>
+              value && (
+                <Item variant="default" size="xs" key={key}>
+                  <ItemContent>
+                    <ItemTitle className="font-semibold text-xs">{key}</ItemTitle>
+                    <ItemDescription className="text-xs">{value}</ItemDescription>
+                  </ItemContent>
+                </Item>
+              )
+          )}
+          <Item size="xs" className="p-0">
+            <ItemContent>
+              <div className="space-y-4">
+                {fileData.tracksData.map((track) => {
+                  return (
+                    <Item
+                      key={track.id}
+                      variant={'default'}
+                      className='**:data-[slot="item-title"]:text-xs **:data-[slot="item-description"]:text-xs bg-muted'
+                    >
+                      <ItemContent>
+                        <ItemTitle className="capitalize bg-primary text-primary-foreground p-1 px-2 rounded-full text-[10px]!">
+                          {track.type}
+                        </ItemTitle>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Item>
+                            <ItemContent>
+                              <ItemTitle>Average bitrate</ItemTitle>
+                              <ItemDescription>
+                                {track.averageBitrate ? formatBitrate(track.averageBitrate) : 'N/A'}
+                              </ItemDescription>
+                            </ItemContent>
+                          </Item>
+                          <Item>
+                            <ItemContent>
+                              <ItemTitle>Codec</ItemTitle>
+                              <ItemDescription>{track.codec ?? 'N/A'}</ItemDescription>
+                            </ItemContent>
+                          </Item>
+                          <Item>
+                            <ItemContent>
+                              <ItemTitle>Codec string</ItemTitle>
+                              <ItemDescription>{track.codecParamString ?? 'N/A'}</ItemDescription>
+                            </ItemContent>
+                          </Item>
+                          <Item>
+                            <ItemContent>
+                              <ItemTitle>Language</ItemTitle>
+                              <ItemDescription>{track.lang ?? 'N/A'}</ItemDescription>
+                            </ItemContent>
+                          </Item>
+                          {track.isVideo && (
+                            <>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Frame rate</ItemTitle>
+                                  <ItemDescription>
+                                    {track.frameRate ? truncateTo2Decimals(track.frameRate) : 'N/A'}
+                                  </ItemDescription>
+                                </ItemContent>
+                              </Item>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Coded height</ItemTitle>
+                                  <ItemDescription>{track.codedHeight ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Coded width</ItemTitle>
+                                  <ItemDescription>{track.codedWidth ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Display height</ItemTitle>
+                                  <ItemDescription>{track.displayHeight ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Display width</ItemTitle>
+                                  <ItemDescription>{track.displayWidth ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                            </>
+                          )}
+                          {track.isAudio && (
+                            <>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Sample rate</ItemTitle>
+                                  <ItemDescription>{track.sampleRate ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                              <Item>
+                                <ItemContent>
+                                  <ItemTitle>Channels</ItemTitle>
+                                  <ItemDescription>{track.channels ?? 'N/A'}</ItemDescription>
+                                </ItemContent>
+                              </Item>
+                            </>
+                          )}
+                        </div>
+                      </ItemContent>
+                    </Item>
+                  )
+                })}
+              </div>
+            </ItemContent>
+          </Item>
         </div>
       </DialogContent>
     </Dialog>
