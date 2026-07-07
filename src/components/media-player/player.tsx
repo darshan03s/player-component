@@ -11,7 +11,7 @@ import {
   VolumeX
 } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,6 +26,7 @@ import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/i
 import { cn } from '@/lib/utils'
 import { formatBitrate, formatBytes, formatDuration, truncateTo2Decimals } from './utils'
 import { PlayerProvider, usePlayerStaticContext, usePlayerPlaybackContext } from './provider'
+import { getTracksData, TrackData } from './mediabunny'
 
 type PlayerProps = {
   file: File
@@ -199,6 +200,13 @@ const FileName = memo(function FileName() {
 
 const InfoModal = memo(function InfoModal({ children }: { children: React.ReactNode }) {
   const { file, fileData } = usePlayerStaticContext()
+  const [tracksData, setTracksData] = useState<TrackData[]>([])
+
+  useEffect(() => {
+    getTracksData(file).then((tracksData) => {
+      setTracksData(tracksData)
+    })
+  }, [file])
 
   const hoverCardContentMap = {
     'Last modified': new Date(file.lastModified).toLocaleDateString(),
@@ -235,7 +243,7 @@ const InfoModal = memo(function InfoModal({ children }: { children: React.ReactN
           <Item size="xs" className="p-0">
             <ItemContent>
               <div className="space-y-4">
-                {fileData.tracksData.map((track) => {
+                {tracksData.map((track) => {
                   return (
                     <Item
                       key={track.id}

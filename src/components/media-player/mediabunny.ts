@@ -13,7 +13,6 @@ import {
 export type InputFileData = {
   audioTracks: InputAudioTrack[]
   duration: number
-  computedDuration: number
   format: {
     name: string
     mimeType: string
@@ -21,7 +20,6 @@ export type InputFileData = {
   metadataTags: MetadataTags
   mimeType: string
   size: number | null
-  tracksData: TrackData[]
 }
 
 export type TrackData = Awaited<ReturnType<typeof getTrackData>> & {
@@ -36,11 +34,15 @@ export type TrackData = Awaited<ReturnType<typeof getTrackData>> & {
   channels?: number
 }
 
-export async function getFileData(file: File): Promise<InputFileData> {
-  const input = new Input({
+function getInput(file: File) {
+  return new Input({
     formats: ALL_FORMATS,
     source: new BlobSource(file)
   })
+}
+
+export async function getFileData(file: File): Promise<InputFileData> {
+  const input = getInput(file)
 
   let data = {}
 
@@ -53,21 +55,14 @@ export async function getFileData(file: File): Promise<InputFileData> {
     input.source.getSizeOrNull()
   ])
 
-  const computedDuration = await input.computeDuration()
-
   data = {
     audioTracks,
     duration,
-    computedDuration,
     format: { name: format.name, mimeType: format.mimeType },
     metadataTags,
     mimeType,
     size
   }
-
-  const tracksData = await getTracksData(input)
-
-  data = { ...data, tracksData }
 
   return data as InputFileData
 }
@@ -126,7 +121,8 @@ export async function getTrackData(track: InputTrack) {
   return trackData
 }
 
-export async function getTracksData(input: Input) {
+export async function getTracksData(file: File) {
+  const input = getInput(file)
   const tracks = await input.getTracks()
 
   const tracksData = []
