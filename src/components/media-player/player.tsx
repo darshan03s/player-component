@@ -115,6 +115,9 @@ const PlayerFooter = memo(function PlayerFooter() {
         '**:data-playpause:text-primary-foreground **:data-playpause:bg-primary/80',
         '**:data-controls-right:text-primary-foreground **:data-controls-right:bg-primary/80',
         !posterUrl ? '**:data-filename:text-foreground' : '**:data-filename:text-white',
+        !posterUrl
+          ? '**:data-seek:bg-muted **:data-seek:text-muted-foreground'
+          : '**:data-seek:bg-primary/20 **:data-seek:text-primary-foreground',
         "**:data-[slot='slider-track']:bg-primary/30 **:data-[slot='slider-track']:cursor-pointer",
         "**:data-[slot='slider-range']:bg-primary/80"
       )}
@@ -152,13 +155,13 @@ const Controls = () => {
         {formatDuration(currentTime)} / {formatDuration(duration)}
       </span>
       <span className="flex items-center justify-center gap-2">
-        <Button title="Rewind" variant="ghost" size="icon-xs" onClick={handleRewind}>
+        <Button data-seek title="Rewind" size="icon-xs" onClick={handleRewind}>
           <Rewind className="size-3" />
         </Button>
         <Button data-playpause size="icon-xs" onClick={playPause} title="Play/Pause">
           {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
         </Button>
-        <Button title="Fast Forward" variant="ghost" size="icon-xs" onClick={handleFastForward}>
+        <Button data-seek title="Fast Forward" size="icon-xs" onClick={handleFastForward}>
           <FastForward className="size-3" />
         </Button>
       </span>
