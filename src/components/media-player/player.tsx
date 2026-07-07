@@ -62,11 +62,11 @@ const Poster = memo(function Poster() {
 })
 
 const Video = memo(function Video() {
-  const { videoRef, showHTMLControls, posterUrl, videoUrl, setIsPlaying, type } =
+  const { videoRef, showHTMLControls, posterUrl, videoUrl, setIsPlaying, type, playPause } =
     usePlayerStaticContext()
 
   return (
-    <CardContent className="p-0 relative aspect-video min-w-120 w-120">
+    <CardContent className="p-0 relative aspect-video min-w-120 w-120" onClick={playPause}>
       {type === 'audio' && !posterUrl && (
         <div className="absolute inset-0 flex items-center justify-center bg-linear-to-b from-primary/10 to-transparent">
           <Music className="size-14 text-primary" />
