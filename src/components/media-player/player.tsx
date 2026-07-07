@@ -2,12 +2,14 @@
 
 import {
   EllipsisVertical,
+  FastForward,
   Image as ImageIcon,
   Info,
   Maximize,
   Music,
   Pause,
   Play,
+  Rewind,
   Volume2,
   VolumeX
 } from 'lucide-react'
@@ -125,7 +127,8 @@ const PlayerFooter = memo(function PlayerFooter() {
 })
 
 const Controls = () => {
-  const { playPause, handleMute, handleCapture, type } = usePlayerStaticContext()
+  const { playPause, handleMute, handleCapture, type, handleRewind, handleFastForward } =
+    usePlayerStaticContext()
   const { currentTime, duration, isPlaying, isMuted } = usePlayerPlaybackContext()
 
   const rightControls = [
@@ -148,9 +151,15 @@ const Controls = () => {
       <span data-time className="flex items-center">
         {formatDuration(currentTime)} / {formatDuration(duration)}
       </span>
-      <span className="flex items-center justify-center">
+      <span className="flex items-center justify-center gap-2">
+        <Button title="Rewind" variant="ghost" size="icon-xs" onClick={handleRewind}>
+          <Rewind className="size-3" />
+        </Button>
         <Button data-playpause size="icon-xs" onClick={playPause} title="Play/Pause">
           {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
+        </Button>
+        <Button title="Fast Forward" variant="ghost" size="icon-xs" onClick={handleFastForward}>
+          <FastForward className="size-3" />
         </Button>
       </span>
       <div className="flex items-center justify-end gap-2">

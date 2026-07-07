@@ -24,6 +24,8 @@ type PlayerStaticContextType = {
   handleMute: () => void
   handleMaximize: () => void
   handleCapture: () => void
+  handleRewind: () => void
+  handleFastForward: () => void
   type: 'video' | 'audio' | 'unknown'
 }
 
@@ -147,6 +149,18 @@ export const PlayerProvider = ({
     videoRef.current?.requestFullscreen()
   }, [])
 
+  const handleRewind = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime -= 10
+  }, [])
+
+  const handleFastForward = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime += 10
+  }, [])
+
   const handleCapture = useCallback(() => {
     const video = videoRef.current
     if (!video) return
@@ -179,6 +193,8 @@ export const PlayerProvider = ({
       handleMute,
       handleMaximize,
       handleCapture,
+      handleRewind,
+      handleFastForward,
       type
     }
   }, [
@@ -194,6 +210,8 @@ export const PlayerProvider = ({
     handleMute,
     handleMaximize,
     handleCapture,
+    handleRewind,
+    handleFastForward,
     type
   ])
 
