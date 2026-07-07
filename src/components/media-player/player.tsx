@@ -132,12 +132,14 @@ const Controls = () => {
     {
       id: 'mute',
       icon: isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />,
-      onClick: handleMute
+      onClick: handleMute,
+      title: 'Mute/Unmute'
     },
     {
       id: 'capture',
       icon: <ImageIcon className="size-3" />,
-      onClick: handleCapture
+      onClick: handleCapture,
+      title: 'Capture frame'
     }
   ]
 
@@ -147,7 +149,7 @@ const Controls = () => {
         {formatDuration(currentTime)} / {formatDuration(duration)}
       </span>
       <span className="flex items-center justify-center">
-        <Button data-playpause size="icon-xs" onClick={playPause}>
+        <Button data-playpause size="icon-xs" onClick={playPause} title="Play/Pause">
           {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
         </Button>
       </span>
@@ -162,6 +164,7 @@ const Controls = () => {
               data-controls-right
               size="icon-xs"
               onClick={control.onClick}
+              title={control.title}
               className={`${control.id === 'capture' && 'hidden md:inline-flex'}`}
             >
               {control.icon}
@@ -169,7 +172,7 @@ const Controls = () => {
           )
         })}
         <MoreControls>
-          <Button data-controls-right size="icon-xs">
+          <Button data-controls-right size="icon-xs" title="More controls">
             <EllipsisVertical className="size-3" />
           </Button>
         </MoreControls>
@@ -186,19 +189,22 @@ const MoreControls = ({ children }: { children: React.ReactNode }) => {
     {
       id: 'info',
       icon: <Info className="size-3" />,
-      label: 'Info'
+      label: 'Info',
+      title: 'Show info'
     },
     {
       id: 'capture',
       icon: <ImageIcon className="size-3" />,
       onClick: handleCapture,
-      label: 'Capture'
+      label: 'Capture',
+      title: 'Capture frame'
     },
     {
       id: 'maximize',
       icon: <Maximize className="size-3" />,
       onClick: handleMaximize,
-      label: 'Maximize'
+      label: 'Maximize',
+      title: 'Maximize player'
     }
   ]
 
@@ -215,6 +221,7 @@ const MoreControls = ({ children }: { children: React.ReactNode }) => {
                     key={control.id}
                     className="text-xs cursor-pointer"
                     onSelect={() => setInfoOpen(true)}
+                    title={control.title}
                   >
                     {control.icon} {control.label}
                   </DropdownMenuItem>
@@ -225,6 +232,7 @@ const MoreControls = ({ children }: { children: React.ReactNode }) => {
                   key={control.id}
                   className={`text-xs cursor-pointer ${control.id === 'capture' && 'inline-flex md:hidden'}`}
                   onClick={control.onClick}
+                  title={control.title}
                 >
                   {control.icon} {control.label}
                 </DropdownMenuItem>
