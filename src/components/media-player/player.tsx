@@ -111,7 +111,7 @@ const PlayerFooter = memo(function PlayerFooter() {
 })
 
 const Controls = () => {
-  const { playPause, handleMute, handleMaximize, handleCapture } = usePlayerStaticContext()
+  const { playPause, handleMute, handleMaximize, handleCapture, type } = usePlayerStaticContext()
   const { currentTime, duration, isPlaying, isMuted } = usePlayerPlaybackContext()
 
   const rightControls = [
@@ -156,6 +156,9 @@ const Controls = () => {
                 </Button>
               </InfoModal>
             )
+          }
+          if (type === 'audio' && control.id === 'capture') {
+            return null
           }
           return (
             <Button key={control.id} data-controls-right size="icon-xs" onClick={control.onClick}>
