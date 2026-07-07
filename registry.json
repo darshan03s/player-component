@@ -8,8 +8,9 @@
       "type": "registry:block",
       "title": "Media Player",
       "description": "A media player component for audio and video files",
+      "version": "0.1.0",
       "registryDependencies": ["button", "dialog", "item", "card", "dropdown-menu", "slider"],
-      "dependencies": ["mediabunny"],
+      "dependencies": ["mediabunny@^1.50.6"],
       "files": [
         {
           "path": "src/components/media-player/index.ts",
