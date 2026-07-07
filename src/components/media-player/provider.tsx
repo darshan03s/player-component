@@ -150,6 +150,7 @@ export const PlayerProvider = ({
   const handleCapture = useCallback(() => {
     const video = videoRef.current
     if (!video) return
+    video.pause()
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
