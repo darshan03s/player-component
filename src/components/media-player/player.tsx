@@ -114,6 +114,28 @@ const Controls = () => {
   const { playPause, handleMute, handleMaximize, handleCapture } = usePlayerStaticContext()
   const { currentTime, duration, isPlaying, isMuted } = usePlayerPlaybackContext()
 
+  const rightControls = [
+    {
+      id: 'mute',
+      icon: isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />,
+      onClick: handleMute
+    },
+    {
+      id: 'maximize',
+      icon: <Maximize className="size-3" />,
+      onClick: handleMaximize
+    },
+    {
+      id: 'capture',
+      icon: <ImageIcon className="size-3" />,
+      onClick: handleCapture
+    },
+    {
+      id: 'info',
+      icon: <Info className="size-3" />
+    }
+  ]
+
   return (
     <div className="text-xs font-sans w-full grid grid-cols-3">
       <span data-time className="flex items-center">
@@ -125,16 +147,22 @@ const Controls = () => {
         </Button>
       </span>
       <div className="flex items-center justify-end gap-2">
-        <Button data-controls-right size="icon-xs" onClick={handleMute}>
-          {isMuted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
-        </Button>
-        <Button data-controls-right size="icon-xs" onClick={handleMaximize}>
-          <Maximize className="size-3" />
-        </Button>
-        <Button data-controls-right size="icon-xs" onClick={handleCapture}>
-          <ImageIcon className="size-3" />
-        </Button>
-        <InfoModal />
+        {rightControls.map((control) => {
+          if (control.id === 'info') {
+            return (
+              <InfoModal key={control.id}>
+                <Button data-controls-right size="icon-xs">
+                  <Info className="size-3" />
+                </Button>
+              </InfoModal>
+            )
+          }
+          return (
+            <Button key={control.id} data-controls-right size="icon-xs" onClick={control.onClick}>
+              {control.icon}
+            </Button>
+          )
+        })}
       </div>
     </div>
   )
@@ -166,7 +194,7 @@ const FileName = memo(function FileName() {
   )
 })
 
-const InfoModal = memo(function InfoModal() {
+const InfoModal = memo(function InfoModal({ children }: { children: React.ReactNode }) {
   const { file, fileData } = usePlayerStaticContext()
 
   const hoverCardContentMap = {
@@ -183,11 +211,7 @@ const InfoModal = memo(function InfoModal() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button data-controls-right size="icon-xs">
-          <Info className="size-3" />
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Info</DialogTitle>
