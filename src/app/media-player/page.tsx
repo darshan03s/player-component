@@ -1,5 +1,5 @@
 'use client'
-import { Player } from '@/components/media-player'
+import { MediaPlayer } from '@/components/media-player'
 
 import Main from '@/components/main'
 import FileImport from '@/components/file-import'
@@ -10,7 +10,7 @@ const Page = () => {
 
   return (
     <Main className="flex items-center justify-center ">
-      <div>{!file ? <FileImport setFile={setFile} /> : <Player file={file} />}</div>
+      <div>{!file ? <FileImport setFile={setFile} /> : <MediaPlayer file={file} />}</div>
     </Main>
   )
 }
