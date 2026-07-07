@@ -53,12 +53,7 @@ const PlayerMain = ({ className }: { className?: string }) => {
   const { fileData } = usePlayerStaticContext()
 
   return (
-    <Card
-      className={cn(
-        'w-86 md:w-120 h-71 md:h-90 max-w-full gap-0 p-0 relative overflow-hidden',
-        className
-      )}
-    >
+    <Card className={cn('w-86 md:w-120 max-w-full gap-0 p-0 relative overflow-hidden', className)}>
       {!fileData ? (
         <div className="absolute inset-0 bg-muted animate-pulse" />
       ) : (

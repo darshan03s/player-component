@@ -11,7 +11,9 @@ const Page = () => {
 
   return (
     <Main className="flex items-center justify-center ">
-      <div>{!file ? <FileImport setFile={setFile} /> : <MediaPlayer file={file} />}</div>
+      <div>
+        {!file ? <FileImport setFile={setFile} /> : <MediaPlayer file={file} showFileName={true} />}
+      </div>
     </Main>
   )
 }
