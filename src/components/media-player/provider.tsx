@@ -1,4 +1,4 @@
-import { getFileData, InputFileData } from '@/components/media-player/mediabunny'
+import { getFileData, InputFileData } from './mediabunny'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { getType } from './utils'
 
