@@ -155,11 +155,13 @@ const ProgressBar = () => {
 }
 
 const FileName = memo(function FileName() {
-  const { file } = usePlayerStaticContext()
+  const { fileData, file } = usePlayerStaticContext()
+
+  const fileName = fileData.metadataTags.title || file.name
 
   return (
-    <span data-filename className="min-w-0 w-full truncate text-xs text-center" title={file.name}>
-      {file.name}
+    <span data-filename className="min-w-0 w-full truncate text-xs text-center" title={fileName}>
+      {fileName}
     </span>
   )
 })
