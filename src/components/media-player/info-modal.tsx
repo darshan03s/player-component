@@ -88,17 +88,19 @@ export const InfoModal = memo(function InfoModal({ children }: { children: React
           <DialogDescription>Metadata about the file</DialogDescription>
         </DialogHeader>
         <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
-          {Object.entries(hoverCardContentMap).map(
-            ([key, value]) =>
-              value && (
-                <Item variant="default" size="xs" key={key}>
-                  <ItemContent>
-                    <ItemTitle className="font-semibold text-xs">{key}</ItemTitle>
-                    <ItemDescription className="text-xs">{value}</ItemDescription>
-                  </ItemContent>
-                </Item>
-              )
-          )}
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(hoverCardContentMap).map(
+              ([key, value]) =>
+                value && (
+                  <Item variant="default" size="xs" key={key}>
+                    <ItemContent>
+                      <ItemTitle className="font-semibold text-xs">{key}</ItemTitle>
+                      <ItemDescription className="text-xs">{value}</ItemDescription>
+                    </ItemContent>
+                  </Item>
+                )
+            )}
+          </div>
           <Item size="xs" className="p-0">
             <ItemContent>
               <div className="space-y-4">
