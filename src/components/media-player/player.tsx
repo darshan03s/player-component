@@ -27,12 +27,12 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 
-type PlayerProps = {
+type MediaPlayerProps = {
   file: File
   showHTMLControls?: boolean
 }
 
-const Player = ({ file, showHTMLControls }: PlayerProps) => {
+export const MediaPlayer = ({ file, showHTMLControls }: MediaPlayerProps) => {
   return (
     <PlayerProvider file={file} showHTMLControls={showHTMLControls}>
       <PlayerMain />
@@ -251,5 +251,3 @@ const FileName = memo(function FileName() {
     </span>
   )
 })
-
-export default Player
