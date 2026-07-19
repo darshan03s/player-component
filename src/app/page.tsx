@@ -1,6 +1,5 @@
 import Main from '@/components/main'
 import Link from 'next/link'
-import './globals.css'
 
 const Page = () => {
   return (

@@ -4,6 +4,7 @@ import Header from '@/components/header'
 import { siteMetadata } from '@/metadata'
 import { Analytics } from '@vercel/analytics/next'
 import Providers from '@/components/providers'
+import './globals.css'
 
 const fontSans = Geist({
   variable: '--font-sans',
