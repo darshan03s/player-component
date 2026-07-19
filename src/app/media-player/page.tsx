@@ -5,7 +5,6 @@ import Main from '@/components/main'
 import FileImport from '@/components/file-import'
 import { useState } from 'react'
 import './styles.css'
-import { ReactScan } from '@/components/react-scan'
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -15,7 +14,6 @@ const Page = () => {
       <div>
         {!file ? <FileImport setFile={setFile} /> : <MediaPlayer file={file} showFileName={true} />}
       </div>
-      <ReactScan />
     </Main>
   )
 }
