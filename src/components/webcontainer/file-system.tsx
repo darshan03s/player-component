@@ -30,8 +30,8 @@ export const FileSystem = () => {
       className="w-64 border-r overflow-scroll no-scrollbar text-xs relative"
       hidden={!fileSystemOpen}
     >
-      <div className="filesystem-header sticky top-0 left-0 h-8 pr-1 border-b bg-background z-10 flex items-center justify-between">
-        <div className="flex items-center">
+      <div className="filesystem-header sticky top-0 left-0 h-8 px-1 border-b bg-background z-10 flex items-center justify-between">
+        <div className="flex items-center gap-1">
           <Button
             variant={'ghost'}
             size={'icon-xs'}
@@ -59,7 +59,7 @@ export const FileSystem = () => {
 }
 
 const FsItem = ({ item }: { item: ReadDirEntry }) => {
-  const { readDir } = useWebcontainerContext()
+  const { readDir, activePath } = useWebcontainerContext()
   const [children, setChildren] = useState<ReadDirEntry[]>([])
 
   async function handleFsItemClick() {
@@ -72,6 +72,8 @@ const FsItem = ({ item }: { item: ReadDirEntry }) => {
         })
         setChildren(items)
       }
+    } else if (item.isFile()) {
+      activePath(item.path)
     }
   }
 
@@ -99,7 +101,7 @@ const FsItem = ({ item }: { item: ReadDirEntry }) => {
         </ItemContent>
       </Item>
       {children.length > 0 && (
-        <div className="flex flex-col gap-2 pl-2">
+        <div className="flex flex-col gap-2 ml-2 pl-2 border-l">
           <FsTree fsItems={children} />
         </div>
       )}

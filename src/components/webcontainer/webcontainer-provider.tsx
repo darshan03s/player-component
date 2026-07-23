@@ -44,6 +44,11 @@ type LoadSnapshot = (snapshotUrl: string) => Promise<void>
 
 type Init = (loadFromSnapshot?: string) => Promise<void>
 
+type ActiveFile = {
+  path: string
+  content: string
+}
+
 type WebcontainerContextType = {
   wc: WebContainer | null
   boot: Boot
@@ -59,6 +64,8 @@ type WebcontainerContextType = {
   mounted: boolean
   init: Init
   rootDir: string
+  activePath: (path: string) => void
+  activeFile: ActiveFile
 }
 
 const WebcontainerContext = createContext<WebcontainerContextType | undefined>(undefined)
@@ -72,6 +79,10 @@ export const WebcontainerProvider = ({
 }) => {
   const [wc, setWc] = useState<WebContainer | null>(null)
   const [mounted, setMounted] = useState<boolean>(false)
+  const [activeFile, setActiveFile] = useState<ActiveFile>({
+    path: '',
+    content: ''
+  })
 
   function requireWc(): WebContainer {
     if (!wc) {
@@ -182,6 +193,14 @@ export const WebcontainerProvider = ({
     }
   }
 
+  const activePath = async (path: string) => {
+    const content = await readFile(path, 'utf-8')
+    setActiveFile({
+      path,
+      content
+    })
+  }
+
   return (
     <WebcontainerContext.Provider
       value={{
@@ -198,7 +217,9 @@ export const WebcontainerProvider = ({
         loadSnapshot,
         mounted,
         init,
-        rootDir
+        rootDir,
+        activePath,
+        activeFile
       }}
     >
       {children}
