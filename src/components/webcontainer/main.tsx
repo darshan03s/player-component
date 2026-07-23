@@ -11,10 +11,10 @@ const Main = () => {
   const { activeFile } = useWebcontainerContext()
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 flex flex-col">
       <div
         className={cn(
-          'main-tree sticky top-0 left-0 h-8 border-b flex items-center px-1 bg-background z-10'
+          'main-tree sticky top-0 left-0 h-(--inner-header-height) min-h-(--inner-header-height) border-b flex items-center px-1 bg-background z-10'
         )}
       >
         <div hidden={fileSystemOpen} className="flex items-center">
@@ -29,7 +29,7 @@ const Main = () => {
         </div>
         <span className="text-xs font-semibold">{activeFile.path}</span>
       </div>
-      <div>{activeFile.content}</div>
+      <div className="flex-1 overflow-scroll no-scrollbar">{activeFile.content}</div>
     </div>
   )
 }

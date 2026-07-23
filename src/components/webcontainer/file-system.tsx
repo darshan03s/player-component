@@ -32,10 +32,10 @@ export const FileSystem = () => {
 
   return (
     <div
-      className="w-64 border-r overflow-scroll no-scrollbar text-xs relative"
+      className="w-(--fs-width) min-w-(--fs-width) border-r text-xs relative flex flex-col"
       hidden={!fileSystemOpen}
     >
-      <div className="filesystem-header sticky top-0 left-0 h-8 px-1 border-b bg-background z-10 flex items-center justify-between">
+      <div className="filesystem-header h-(--inner-header-height) min-h-(--inner-header-height) px-1 border-b bg-background z-10 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Button
             variant={'ghost'}
@@ -56,7 +56,7 @@ export const FileSystem = () => {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-2 p-1">
+      <div className="flex-1 flex flex-col gap-2 p-1 overflow-scroll no-scrollbar">
         <FsTree fsItems={fsItems} />
       </div>
     </div>
