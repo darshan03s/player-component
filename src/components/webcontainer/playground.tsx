@@ -29,7 +29,7 @@ const Comp = ({ loadFromSnapshot }: PlaygroundProps) => {
   }, [])
 
   return (
-    <div className="w-240 h-140 border rounded-lg flex flex-col">
+    <div className="[--playground-width:--spacing(240)] [--playground-height:--spacing(140)] w-(--playground-width) h-(--playground-height) border rounded-lg flex flex-col">
       <div className="bg-background rounded-tl-lg rounded-tr-lg min-h-10 h-10 px-2 flex items-center justify-between border-b">
         <span></span>
         <Button variant={'secondary'} size={'icon-xs'}>

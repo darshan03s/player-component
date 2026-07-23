@@ -6,11 +6,19 @@ import { useFileSystem } from './filesystem-provider'
 import { cn } from '@/lib/utils'
 import { useWebcontainer } from './webcontainer-provider'
 import { Spinner } from '@/components/ui/spinner'
+import CodeMirror from '@uiw/react-codemirror'
 
 const EditorComp = () => {
   const { activeFile } = useWebcontainer()
 
-  return <div className="flex-1 overflow-scroll no-scrollbar">{activeFile.content}</div>
+  return (
+    <div className="flex-1 overflow-scroll no-scrollbar">
+      <CodeMirror
+        value={activeFile.content}
+        className="h-full [&_.cm-activeLine]:bg-transparent! [&_.cm-activeLineGutter]:bg-transparent! [&_.cm-editor]:h-full! [&_.cm-scroller]:no-scrollbar"
+      />
+    </div>
+  )
 }
 
 export const Editor = () => {
@@ -18,7 +26,7 @@ export const Editor = () => {
   const { activeFile, mounted } = useWebcontainer()
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col">
       <div
         className={cn(
           'main-tree sticky top-0 left-0 h-(--inner-header-height) min-h-(--inner-header-height) border-b flex items-center px-1 bg-background z-10'
