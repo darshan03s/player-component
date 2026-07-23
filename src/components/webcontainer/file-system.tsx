@@ -14,9 +14,13 @@ export const FileSystem = () => {
   const [fsItems, setFsItems] = useState<ReadDirEntry[]>([])
 
   async function loadItems() {
-    const items = await readDir(rootDir, {
-      withFileTypes: true
-    })
+    const items = await readDir(
+      rootDir,
+      {
+        withFileTypes: true
+      },
+      true
+    )
     setFsItems(items)
   }
 
@@ -67,9 +71,13 @@ const FsItem = ({ item }: { item: ReadDirEntry }) => {
       if (children.length > 0) {
         setChildren([])
       } else {
-        const items = await readDir(item.path, {
-          withFileTypes: true
-        })
+        const items = await readDir(
+          item.path,
+          {
+            withFileTypes: true
+          },
+          true
+        )
         setChildren(items)
       }
     } else if (item.isFile()) {

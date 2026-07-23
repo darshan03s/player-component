@@ -34,7 +34,11 @@ type WriteFile = (
 
 type MkDir = (...args: Parameters<FileSystemAPI['mkdir']>) => ReturnType<FileSystemAPI['mkdir']>
 
-type ReadDir = (...args: Parameters<FileSystemAPI['readdir']>) => Promise<ReadDirEntry[]>
+type ReadDir = (
+  path: Parameters<FileSystemAPI['readdir']>['0'],
+  options: Parameters<FileSystemAPI['readdir']>['1'],
+  foldersFirst?: boolean
+) => Promise<ReadDirEntry[]>
 
 type Rm = (...args: Parameters<FileSystemAPI['rm']>) => ReturnType<FileSystemAPI['rm']>
 
@@ -148,7 +152,7 @@ export const WebcontainerProvider = ({
     return await wc.fs.mkdir(folderPath, options)
   }
 
-  const readDir: ReadDir = async (path, options) => {
+  const readDir: ReadDir = async (path, options, foldersFirst = false) => {
     const wc = requireWc()
     const items = await wc.fs.readdir(path, options)
     const itemsWithPath = items.map((item) => ({
@@ -157,6 +161,11 @@ export const WebcontainerProvider = ({
       isFile: () => item.isFile(),
       isDirectory: () => item.isDirectory()
     }))
+    if (foldersFirst) {
+      const folders = itemsWithPath.filter((i) => i.isDirectory())
+      const files = itemsWithPath.filter((i) => i.isFile())
+      return [...folders, ...files]
+    }
     return itemsWithPath
   }
 
