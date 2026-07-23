@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { ReadDirEntry } from './types'
 import { cn } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
 
 export const FileSystem = () => {
   const { fileSystemOpen, toggleFileSystem } = useFileSystemContext()
@@ -56,9 +57,15 @@ export const FileSystem = () => {
           </Button>
         </div>
       </div>
-      <div className="flex-1 flex flex-col gap-2 p-1 overflow-scroll no-scrollbar">
-        <FsTree fsItems={fsItems} />
-      </div>
+      {!mounted ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col gap-2 p-1 overflow-scroll no-scrollbar">
+          <FsTree fsItems={fsItems} />
+        </div>
+      )}
     </div>
   )
 }
